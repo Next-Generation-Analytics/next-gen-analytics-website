@@ -68,7 +68,7 @@
         </div>
 
         <!-- Graph container takes remaining space -->
-        <div class="flex-1 bg-white rounded-2xl shadow-xl overflow-hidden relative min-h-0 max-h-[65%]" style="background-image: linear-gradient(#e5f3ff 1px, transparent 1px), linear-gradient(90deg, #e5f3ff 1px, transparent 1px); background-size: 20px 20px;">
+        <div class="flex-1 bg-white rounded-2xl shadow-xl overflow-hidden relative min-h-0 sm:max-h-[65%] max-h-[50%]" style="background-image: linear-gradient(#e5f3ff 1px, transparent 1px), linear-gradient(90deg, #e5f3ff 1px, transparent 1px); background-size: 20px 20px;">
             {#if graphData.nodes.length > 0 && graphData.links.length > 0}
                 <D3Graph 
                     nodes={graphData.nodes} 

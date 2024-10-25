@@ -5,11 +5,11 @@
     export let member: TeamMember;
 </script>
 
-<div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105 group flex flex-col">
+<div class="w-90 bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105 group flex flex-col">
     <img 
         src={member.image} 
         alt={member.name}
-        class="w-full h-72 object-cover object-center"
+        class="w-full h-72 object-cover object-center bg-gray-50"
     />
     <div class="p-3 flex flex-col flex-1">
         <div class="flex justify-between items-start">

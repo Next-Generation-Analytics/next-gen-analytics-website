@@ -37,9 +37,9 @@
 <!-- Wrap the entire component in a container div -->
 <div class="w-full py-4">
     <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center">
             {#each filteredMembers as member (member.id)}
-                <div class="max-w-sm">
+                <div class="max-w-sm w-full">
                     <TeamMemberCard 
                         {member} 
                         onSpecialtyClick={handleSpecialtyClick}
@@ -48,7 +48,7 @@
             {/each}
 
             {#if !selectedSpecialty}
-                <div class="max-w-sm">
+                <div class="max-w-sm w-90">
                     <div 
                         class="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105 group flex flex-col cursor-pointer"
                         on:click={() => window.location.href = 'mailto:sachskaren@gmail.com'}

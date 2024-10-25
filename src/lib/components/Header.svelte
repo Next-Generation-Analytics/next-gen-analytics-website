@@ -10,7 +10,7 @@
 
 <header class="relative z-20">
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="Top">
-        <div class="w-full pt-6 flex items-center justify-between">
+        <div class="w-full sm:pt-6 pt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
             <div class="flex items-center">
                 <a href="/" class="flex items-center space-x-2 relative group">
                     {#if !isHomePage}
@@ -21,7 +21,7 @@
                     {/if}
                 </a>
             </div>
-            <div class="ml-10 space-x-6">
+            <div class="flex items-center gap-6 sm:ml-10">
                 {#if showHomeLink}
                     <a 
                         href="/" 

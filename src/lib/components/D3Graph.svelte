@@ -42,6 +42,10 @@
     let dragStartPosition = { x: 0, y: 0 };
     const MOVE_THRESHOLD = 3; // pixels of movement to consider it a drag
 
+    let isInitialLoad = true; // Flag to track initial load
+
+    let isVisible = false;
+
     function getNodeRadius(node: Node, containerWidth: number) {
         // Base sizes that scale with container width
         const baseSize = Math.min(containerWidth * 0.05, 65); // Cap at 65px
@@ -52,7 +56,7 @@
 
     function getFontSize(node: Node, containerWidth: number) {
         // Base font size that scales with container width
-        const baseFontSize = Math.min(containerWidth * 0.012, 12); // Cap at 12px
+        const baseFontSize = Math.min(containerWidth * 0.010, 12); // Cap at 12px
         return node.group === 0 
             ? Math.min(Math.max(baseFontSize * 1.2, 14), 16) // Hub text: min 14px, max 16px
             : Math.max(baseFontSize, 10); // Other nodes: minimum 10px
@@ -357,14 +361,6 @@
         if (isTransitioning) return;
         isTransitioning = true;
 
-        // Fade out existing graph
-        const svgSelection = d3.select(svg);
-        await svgSelection
-            .transition()
-            .duration(200)
-            .style("opacity", 0)
-            .end();
-
         // Stop the simulation if it exists
         simulation?.stop();
         simulation = null;
@@ -372,19 +368,15 @@
         // Reinitialize graph
         initializeGraph();
 
-        // Fade in new graph
-        svgSelection
-            .style("opacity", 0)
-            .transition()
-            .duration(200)
-            .style("opacity", 1);
-
+        // Make graph visible after first resize
+        isVisible = true;
         isTransitioning = false;
     }
 
     onMount(() => {
         initializeGraph();
-        
+        isInitialLoad = false; // Set flag after initial initialization
+
         // Create resize observer with debounced handler
         let resizeTimeout: NodeJS.Timeout;
         resizeObserver = new ResizeObserver(() => {
@@ -405,6 +397,8 @@
     });
 
     afterUpdate(() => {
+        if (isInitialLoad) return; // Skip if it's the initial load
+
         const nodesChanged = JSON.stringify(previousNodes) !== JSON.stringify(nodes);
         const linksChanged = JSON.stringify(previousLinks) !== JSON.stringify(links);
         
@@ -420,7 +414,7 @@
     <svg 
         bind:this={svg} 
         class="w-full h-full"
-        style="opacity: 1; transition: opacity 200ms"
+        style="opacity: {isVisible ? 1 : 0}; transition: opacity 200ms"
     ></svg>
 </div>
 
