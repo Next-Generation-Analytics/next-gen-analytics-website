@@ -8,7 +8,6 @@ export const teamMembers: TeamMember[] = [
         image: "/team/karen-sachs.jpg", // Corrected path
         bio: "Dr. Karen Sachs is among the pioneers structuring causal models for studying biomolecular networks. As the Founder and Chief Scientist of our team, she brings experts together across disciplines to understand biological systems in health and disease.",
         specialties: [
-            "Computational Biology",
             "Immunology",
             "Single-Cell Analysis",
             "Machine Learning",
@@ -31,7 +30,6 @@ export const teamMembers: TeamMember[] = [
         image: "/team/eric-mockler.png", // Corrected path
         bio: "Eric Jing Mockler is a multidisciplinary researcher with a focus on bioinformatics, systems biology, and neuroscience. He applies advanced machine learning and statistical methods to integrate complex biological datasets, driving the discovery of therapeutic targets and biomarkers.",
         specialties: [
-            "Computational Biology",
             "Neuroscience",
             "Bioinformatics",
             "Systems Biology",

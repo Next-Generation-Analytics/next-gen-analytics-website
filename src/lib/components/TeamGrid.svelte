@@ -71,7 +71,7 @@
 
                             <div class="flex-1 mb-2 min-h-32">
                                 <p class="text-gray-600 text-sm">
-                                    We're always looking for talented individuals to join our team. If you're passionate about computational biology and data science, we'd love to hear from you.
+                                    If you're passionate about computational biology and data science, we'd love to hear from you.
                                 </p>
                             </div>
 
