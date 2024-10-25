@@ -20,6 +20,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Next Gen Analytics</title>
+</svelte:head>
+
 <ParaglideJS {i18n}>
 	<div class="flex flex-col min-h-screen">
 		<Header showHomeLink={isTeamPage} />
