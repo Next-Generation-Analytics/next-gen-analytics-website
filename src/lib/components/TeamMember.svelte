@@ -1,0 +1,75 @@
+<script lang="ts">
+    import type { TeamMember } from '$lib/types/team';
+    import { Linkedin, Twitter, Github } from 'lucide-svelte';
+
+    export let member: TeamMember;
+</script>
+
+<div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105 group flex flex-col">
+    <img 
+        src={member.image} 
+        alt={member.name}
+        class="w-full h-72 object-cover object-center"
+    />
+    <div class="p-3 flex flex-col flex-1">
+        <div class="flex justify-between items-start">
+            <div>
+                <h3 class="text-base font-semibold text-gray-900">{member.name}</h3>
+                <p class="text-blue-600 text-sm mb-1">{member.role}</p>
+            </div>
+            {#if member.social}
+                <div class="flex space-x-2 mt-1">
+                    {#if member.social.linkedin}
+                        <a href={member.social.linkedin} class="text-gray-400 hover:text-blue-600" target="_blank">
+                            <Linkedin class="w-6 h-6" />
+                        </a>
+                    {/if}
+                    {#if member.social.twitter}
+                        <a href={member.social.twitter} class="text-gray-400 hover:text-blue-400" target="_blank">
+                            <Twitter class="w-6 h-6" />
+                        </a>
+                    {/if}
+                    {#if member.social.github}
+                        <a href={member.social.github} class="text-gray-400 hover:text-gray-900" target="_blank">
+                            <Github class="w-6 h-6" />
+                        </a>
+                    {/if}
+                </div>
+            {/if}
+        </div>
+        
+        <div class="flex-1 mb-2 min-h-32">
+            <p class="text-gray-600 text-sm">{member.bio}</p>
+        </div>
+
+        <div class="mt-auto">
+            <div class="flex flex-wrap gap-1">
+                {#each member.specialties as specialty}
+                    <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs transition-colors group-hover:bg-blue-200 group-hover:text-blue-900">
+                        {specialty}
+                    </span>
+                {/each}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: rgba(156, 163, 175, 0.5);
+        border-radius: 20px;
+    }
+</style>
