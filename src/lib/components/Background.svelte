@@ -14,15 +14,23 @@
 	if (browser) {
 		prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 		
+		let ticking = false;
 		window.addEventListener('scroll', () => {
-			if (!prefersReducedMotion) {
-				scrollSpring.set(window.scrollY * 1);  // Keep original multiplier
+			if (!prefersReducedMotion && !ticking) {
+				requestAnimationFrame(() => {
+					scrollSpring.set(window.scrollY);
+					ticking = false;
+				});
+				ticking = true;
 			}
 		});
 	}
 </script>
 
-<div class="background-wrapper" role="presentation">
+<div 
+	class="background-wrapper" 
+	role="presentation"
+>
 	<div 
 		class="background-gradient" 
 		role="presentation"
@@ -82,11 +90,18 @@
 		top: 0;
 		left: 0;
 		width: 100%;
-		/* Update height to use custom viewport height */
-		height: 100vh; /* Fallback */
-		height: calc(var(--vh, 1vh) * 100);
+		/* Set minimum height to viewport height plus extra space for safari */
+		min-height: calc(100vh + 100px);
+		/* Make it extend to full page height */
+		height: 100%;
 		z-index: -1;
 		overflow: hidden;
+		transform: translateZ(0);
+		-webkit-transform: translateZ(0);
+		backface-visibility: hidden;
+		-webkit-backface-visibility: hidden;
+		perspective: 1000;
+		will-change: transform;
 	}
 
 	/* Updated gradient for better circle visibility */

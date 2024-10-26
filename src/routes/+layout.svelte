@@ -36,6 +36,12 @@
 
 <svelte:head>
 	<title>Next Gen Analytics</title>
+	<!-- iOS status bar style -->
+	<meta name="apple-mobile-web-app-status-bar-style" content="default">
+	<!-- General theme color for light mode -->
+	<meta name="theme-color" content="hsl(220, 25%, 97%)" media="(prefers-color-scheme: light)">
+	<!-- General theme color for dark mode -->
+	<meta name="theme-color" content="hsl(220, 25%, 9%)" media="(prefers-color-scheme: dark)">
 </svelte:head>
 
 <Background />
