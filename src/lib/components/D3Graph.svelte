@@ -47,6 +47,9 @@
     // Add at the top with other state variables
     let isVisible = false;
 
+    // Add this flag near other state variables
+    let isTouchInteraction = false;
+
     // Add helper function at the top of the script
     function isNode(value: any): value is Node {
         return typeof value === 'object' && value !== null && 'id' in value;
@@ -212,28 +215,56 @@
 
         nodeElements
             .call(drag)
-            .on("mousedown", () => {
-                isDragging = false;
-                dragStartPosition = { x: 0, y: 0 };
-            })
-            .on("click", (event, d) => {
-                if (!isDragging) {
-                    handleNodeClick(event, d);
-                }
-            })
-            .on("mouseenter", (event, d) => {
-                hoveredNodeId = d.id;
-                dispatch('hovered', { 
-                    node: d,
-                    position: { x: 0, y: 0 }
-                });
-            })
-            .on("mouseleave", () => {
+            .on("touchstart", (event, d) => {
+                // Prevent default behavior and stop propagation
+                event.preventDefault();
+                event.stopPropagation();
+                
+                // Mark this as a touch interaction
+                isTouchInteraction = true;
+                
+                // Immediately clear any hover state
                 hoveredNodeId = null;
                 dispatch('hovered', { 
                     node: null, 
                     position: { x: 0, y: 0 } 
                 });
+
+                // Directly handle the node selection without waiting for click
+                if (!isDragging) {
+                    handleNodeClick(event, d);
+                }
+            })
+            .on("mousedown", () => {
+                if (!isTouchInteraction) {
+                    isDragging = false;
+                    dragStartPosition = { x: 0, y: 0 };
+                }
+            })
+            .on("click", (event, d) => {
+                // Only handle click for non-touch interactions
+                if (!isTouchInteraction && !isDragging) {
+                    handleNodeClick(event, d);
+                }
+            })
+            .on("hover", (event, d) => {
+                // Completely skip hover events if there was a recent touch
+                if (!isTouchInteraction) {
+                    hoveredNodeId = d.id;
+                    dispatch('hovered', { 
+                        node: d,
+                        position: { x: 0, y: 0 }
+                    });
+                }
+            })
+            .on("mouseleave", () => {
+                if (!isTouchInteraction) {
+                    hoveredNodeId = null;
+                    dispatch('hovered', { 
+                        node: null, 
+                        position: { x: 0, y: 0 } 
+                    });
+                }
             });
 
         // Add end event listener to simulation
@@ -271,10 +302,6 @@
 
         // Clear hover state immediately when clicked
         hoveredNodeId = null;
-        dispatch('hovered', { 
-            node: null, 
-            position: { x: 0, y: 0 } 
-        });
 
         // Find the clicked node's element
         const clickedNode = d3.select(event.currentTarget);
@@ -518,4 +545,7 @@
         max-height: 100%;
     }
 </style>
+
+
+
 
