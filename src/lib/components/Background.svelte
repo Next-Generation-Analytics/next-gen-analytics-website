@@ -23,48 +23,48 @@
 </script>
 
 <div class="background-wrapper">
-	<div class="background-gradient" />
+	<div class="background-gradient"></div>
 	<div class="background-container">
 		<!-- Large circles with much larger movement values -->
 		<div class="circle circle-1" 
-			style="transform: rotate({$scrollSpring * 0.5}deg) scale({1 + $scrollSpring * 0.002}) 
-			translateX({Math.sin($scrollSpring * 0.05) * 50}px)" />
+			style="transform: rotate({$scrollSpring * 0.3}deg) scale({1 + $scrollSpring * 0.001}) 
+			translateX({Math.sin($scrollSpring * 0.03) * 3}vw)"></div>
 		<div class="circle circle-2" 
-			style="transform: rotate({$scrollSpring * -0.4}deg) scale({1 + $scrollSpring * 0.0025}) 
-			translateX({Math.sin($scrollSpring * 0.04) * -60}px)" />
+			style="transform: rotate({$scrollSpring * -0.25}deg) scale({1 + $scrollSpring * 0.001}) 
+			translateX({Math.sin($scrollSpring * 0.02) * -3}vw)"></div>
 		<div class="circle circle-3" 
-			style="transform: rotate({$scrollSpring * 0.3}deg) scale({1 + $scrollSpring * 0.003}) 
-			translateX({Math.sin($scrollSpring * 0.03) * 40}px)" />
+			style="transform: rotate({$scrollSpring * 0.2}deg) scale({1 + $scrollSpring * 0.001}) 
+			translateX({Math.sin($scrollSpring * 0.02) * 2}vw)"></div>
 		
 		<!-- Medium circles with increased movement -->
 		<div class="circle circle-4" 
-			style="transform: rotate({$scrollSpring * -0.4}deg) translateY({Math.sin($scrollSpring * 0.04) * 10}px)" />
+			style="transform: rotate({$scrollSpring * -0.2}deg) translateY({Math.sin($scrollSpring * 0.02) * 1}vh)"></div>
 		<div class="circle circle-5" 
-			style="transform: rotate({$scrollSpring * 0.5}deg) translateY({Math.sin($scrollSpring * 0.03) * -15}px)" />
+			style="transform: rotate({$scrollSpring * 0.25}deg) translateY({Math.sin($scrollSpring * 0.02) * -1}vh)"></div>
 		<div class="circle circle-6" 
-			style="transform: rotate({$scrollSpring * -0.4}deg) translateY({Math.sin($scrollSpring * 0.04) * 20}px)" />
+			style="transform: rotate({$scrollSpring * -0.2}deg) translateY({Math.sin($scrollSpring * 0.02) * 1}vh)"></div>
 		
 		<!-- Small circles with faster orbital movement -->
 		<div class="circle circle-7" 
-			style="transform: rotate({$scrollSpring * 0.04}deg) translateX({Math.sin($scrollSpring * 0.02) * 15}px)" />
+			style="transform: rotate({$scrollSpring * 0.02}deg) translateX({Math.sin($scrollSpring * 0.01) * 1}vw)"></div>
 		<div class="circle circle-8" 
-			style="transform: rotate({$scrollSpring * -0.045}deg) translateX({Math.sin($scrollSpring * 0.025) * 12}px)" />
+			style="transform: rotate({$scrollSpring * -0.025}deg) translateX({Math.sin($scrollSpring * 0.0125) * 1}vw)"></div>
 		<div class="circle circle-9" 
-			style="transform: rotate({$scrollSpring * 0.05}deg) translateX({Math.sin($scrollSpring * 0.03) * 10}px)" />
+			style="transform: rotate({$scrollSpring * 0.02}deg) translateX({Math.sin($scrollSpring * 0.01) * 1}vw)"></div>
 		<div class="circle circle-10" 
-			style="transform: rotate({$scrollSpring * -0.06}deg) translateX({Math.sin($scrollSpring * 0.035) * 8}px)" />
+			style="transform: rotate({$scrollSpring * -0.03}deg) translateX({Math.sin($scrollSpring * 0.015) * 1}vw)"></div>
 			
 		<!-- New medium circle for left side -->
 		<div class="circle circle-11" 
-			style="transform: rotate({$scrollSpring * 0.45}deg) translateY({Math.sin($scrollSpring * 0.035) * 18}px)" />
+			style="transform: rotate({$scrollSpring * 0.225}deg) translateY({Math.sin($scrollSpring * 0.02) * 1}vh)"></div>
 			
 		<!-- New small circles for left side -->
 		<div class="circle circle-12" 
-			style="transform: rotate({$scrollSpring * -0.055}deg) translateX({Math.sin($scrollSpring * 0.028) * 11}px)" />
+			style="transform: rotate({$scrollSpring * -0.028}deg) translateX({Math.sin($scrollSpring * 0.014) * 1}vw)"></div>
 		<div class="circle circle-13" 
-			style="transform: rotate({$scrollSpring * 0.048}deg) translateX({Math.sin($scrollSpring * 0.022) * 13}px)" />
+			style="transform: rotate({$scrollSpring * 0.024}deg) translateX({Math.sin($scrollSpring * 0.012) * 1}vw)"></div>
 		<div class="circle circle-14" 
-			style="transform: rotate({$scrollSpring * -0.052}deg) translateX({Math.sin($scrollSpring * 0.032) * 9}px)" />
+			style="transform: rotate({$scrollSpring * -0.026}deg) translateX({Math.sin($scrollSpring * 0.013) * 1}vw)"></div>
 	</div>
 </div>
 
@@ -136,8 +136,8 @@
 	.circle {
 		position: absolute;
 		border-radius: 50%;
-		transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-		will-change: transform, opacity;
+		transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+		will-change: transform;
 		transform-origin: center center;
 	}
 
@@ -308,4 +308,48 @@
 		top: 35%;
 		left: 5%;
 	}
+
+	/* Hide select circles only on md breakpoint */
+	@media (max-width: 768px) { /* md breakpoint */
+		/* Hide approximately 1/4 of circles, distributed evenly */
+		.circle-4,  /* top-right */
+		.circle-8,  /* middle-right */
+		.circle-11, /* bottom-left */
+		.circle-14  /* bottom-right */
+		{
+			display: none;
+		}
+
+		/* Adjust all circles to be slightly smaller */
+		.circle-1 {
+			width: 600px;
+			height: 600px;
+		}
+
+		.circle-2 {
+			width: 500px;
+			height: 500px;
+		}
+	}
+
+	/* Only adjust sizes below sm breakpoint, keep all visible circles */
+	@media (max-width: 640px) { 
+		.circle-1 {
+			width: 400px;
+			height: 400px;
+		}
+
+		.circle-2 {
+			width: 300px;
+			height: 300px;
+		}
+	}
+
+	/* Reduce animation intensity for smaller screens */
+	@media (max-width: 768px) {
+		.circle {
+			transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+		}
+	}
 </style>
+

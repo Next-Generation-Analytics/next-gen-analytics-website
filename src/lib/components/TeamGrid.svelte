@@ -37,7 +37,7 @@
 <!-- Wrap the entire component in a container div -->
 <div class="w-full py-4">
     <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 justify-items-center">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 gap-y-8 justify-items-center">
             {#each filteredMembers as member (member.id)}
                 <div class="max-w-sm w-full">
                     <TeamMemberCard 

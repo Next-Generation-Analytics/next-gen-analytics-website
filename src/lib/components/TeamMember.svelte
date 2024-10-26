@@ -5,7 +5,7 @@
     export let member: TeamMember;
 </script>
 
-<div class="w-90 bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105 group flex flex-col">
+<div class="w-90 h-[100%] bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105 group flex flex-col">
     <img 
         src={member.image} 
         alt={member.name}
@@ -18,20 +18,20 @@
                 <p class="text-blue-600 text-sm mb-1">{member.role}</p>
             </div>
             {#if member.social}
-                <div class="flex space-x-2 mt-1">
+                <div class="flex space-x-2 mt-1 gap-4">
                     {#if member.social.linkedin}
                         <a href={member.social.linkedin} class="text-gray-400 hover:text-blue-600" target="_blank">
-                            <Linkedin class="w-6 h-6" />
+                            <Linkedin class="w-8 h-8 sm:w-6 sm:h-6" />
                         </a>
                     {/if}
                     {#if member.social.twitter}
-                        <a href={member.social.twitter} class="text-gray-400 hover:text-blue-400" target="_blank">
-                            <Twitter class="w-6 h-6" />
+                        <a href={member.social.twitter} class="text-gray-400 hover:text-blue-600" target="_blank">
+                            <Twitter class="w-8 h-8 sm:w-6 sm:h-6" />
                         </a>
                     {/if}
                     {#if member.social.github}
                         <a href={member.social.github} class="text-gray-400 hover:text-gray-900" target="_blank">
-                            <Github class="w-6 h-6" />
+                            <Github class="w-8 h-8 sm:w-6 sm:h-6" />
                         </a>
                     {/if}
                 </div>
@@ -55,21 +55,4 @@
 </div>
 
 <style>
-    .custom-scrollbar {
-        scrollbar-width: thin;
-        scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 4px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background-color: rgba(156, 163, 175, 0.5);
-        border-radius: 20px;
-    }
 </style>

@@ -71,7 +71,7 @@
     function initializeGraph() {
         if (!svg || !nodes.length || !links.length) return;
 
-        isStabilized = false; // Reset stabilization state
+        isStabilized = false;
         const svgSelection = d3.select(svg);
         svgSelection.selectAll("*").remove();
 
@@ -80,6 +80,15 @@
         height = boundingRect?.height || 600;
         centerX = width / 2;
         centerY = height / 2;
+
+        // Reset hub node position to center
+        const hubNode = nodes.find(n => n.group === 0);
+        if (hubNode) {
+            hubNode.x = centerX;
+            hubNode.y = centerY;
+            hubNode.fx = centerX;
+            hubNode.fy = centerY;
+        }
 
         // Update collision force to use responsive radius
         simulation = d3.forceSimulation<Node>(nodes)
@@ -244,13 +253,14 @@
     }
 
     function handleNodeClick(event: any, d: Node) {
-        // Only handle click if we weren't dragging
-        if (isDragging) {
-            return;
-        }
+        if (isDragging) return;
 
-        // Dispatch the selection event
-        dispatch('selected', d);
+        // Clear hover state immediately when clicked
+        hoveredNodeId = null;
+        dispatch('hovered', { 
+            node: null, 
+            position: { x: 0, y: 0 } 
+        });
 
         // Find the clicked node's element
         const clickedNode = d3.select(event.currentTarget);
@@ -265,7 +275,6 @@
             .attr('r', r => getNodeRadius(d, width));
 
         // Add ripple effect
-        const circle = clickedNode.select('circle');
         const radius = getNodeRadius(d, width);
         const ripple = clickedNode.append('circle')
             .attr('r', radius)
@@ -274,12 +283,15 @@
             .attr('stroke-width', 2)
             .attr('opacity', 1);
 
+        // Play ripple animation and dispatch event after it completes
         ripple.transition()
-            .duration(400)
-            .attr('r', radius * 1.5)
+            .duration(200)
+            .attr('r', radius * 1.1)
             .attr('opacity', 0)
             .on('end', function() {
                 d3.select(this).remove();
+                // Dispatch the selection event after animation
+                dispatch('selected', d);
             });
 
         // Freeze connected nodes temporarily
@@ -295,7 +307,6 @@
                 node.fx = node.x;
                 node.fy = node.y;
                 
-                // Release after a short delay
                 setTimeout(() => {
                     if (node.group !== 0) { // Don't release hub node
                         node.fx = null;
@@ -322,7 +333,7 @@
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         if (distance > MOVE_THRESHOLD) {
-            if (!isDragging) {
+            if (!isDragging && d.group !== 0) { // Don't modify link strengths for hub node
                 // Only strengthen links when we first determine it's a drag
                 isDragging = true;
                 const linkForce = simulation?.force("link") as d3.ForceLink<Node, Link>;
@@ -342,7 +353,7 @@
     function dragended(event: any, d: any) {
         if (!event.active) {
             simulation?.alphaTarget(0)
-                .alpha(0.3)  // Reduced from 0.5 for gentler movement
+                .alpha(0.25)  // Reduced from 0.5 for gentler movement
                 .alphaDecay(0.03);  // Reduced from 0.04 for slower settling
         }
 
@@ -434,6 +445,51 @@
             initializeGraph();
         }
     });
+
+    // Export a method to trigger node selection programmatically
+    export function selectNode(nodeId: string) {
+        const node = nodes.find(n => n.id === nodeId);
+        if (!node) return;
+
+        // Find the node element
+        const nodeElement = nodeElements.filter(d => d.id === nodeId);
+        if (!nodeElement.empty()) {
+            // Clear hover state
+            hoveredNodeId = null;
+            dispatch('hovered', { 
+                node: null, 
+                position: { x: 0, y: 0 } 
+            });
+
+            // Create click animation
+            nodeElement.select('circle')
+                .transition()
+                .duration(150)
+                .attr('r', r => getNodeRadius(node, width) * 1.2)
+                .transition()
+                .duration(150)
+                .attr('r', r => getNodeRadius(node, width));
+
+            // Add ripple effect
+            const radius = getNodeRadius(node, width);
+            const ripple = nodeElement.append('circle')
+                .attr('r', radius)
+                .attr('fill', 'none')
+                .attr('stroke', 'white')
+                .attr('stroke-width', 2)
+                .attr('opacity', 1);
+
+            // Play ripple animation and dispatch event
+            ripple.transition()
+                .duration(200)
+                .attr('r', radius * 1.1)
+                .attr('opacity', 0)
+                .on('end', function() {
+                    d3.select(this).remove();
+                    dispatch('selected', node);
+                });
+        }
+    }
 </script>
 
 <div class="w-full h-full">
@@ -450,4 +506,3 @@
         max-height: 100%;
     }
 </style>
-

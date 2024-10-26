@@ -28,20 +28,27 @@
 
     // Event handlers for D3Graph events
     function handleHovered(event: CustomEvent<HoverEvent>) {
-        hoveredNode = event.detail;
+        // Only update hover state if no node is selected
+        if (!selectedNode) {
+            hoveredNode = event.detail;
+        }
     }
 
     function handleSelected(event: CustomEvent<Node>) {
         selectedNode = event.detail;
+        // Clear hover state when a node is selected
+        hoveredNode = { node: null, position: { x: 0, y: 0 } };
     }
 
     // Add this function to find and select the hub node
     function selectHubNode() {
         const hubNode = $nodes.find(node => node.group === 0);
         if (hubNode) {
-            selectedNode = hubNode;
+            d3Graph.selectNode(hubNode.id);
         }
     }
+
+    let d3Graph: D3Graph;  // Add this reference
 </script>
 
 <div class="relative flex flex-col">
@@ -51,7 +58,7 @@
             <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
                 Next Generation Analytics
             </h1>
-            <p class="mt-3 max-w-xl mx-auto text-lg text-gray-500">
+            <p class="mt-3 text-md sm:text-lg max-w-xl mx-auto text-gray-500">
                 Research and consulting<br />— systems and computational biology —
             </p>
             <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4 mt-4">
@@ -68,10 +75,11 @@
         </div>
 
         <!-- Graph Container -->
-        <div class="flex-1 bg-white rounded-2xl shadow-xl overflow-hidden relative min-h-0 sm:max-h-[65%] max-h-[50%]" 
+        <div class="flex-1 bg-white rounded-2xl shadow-xl overflow-hidden relative min-h-0 sm:max-h-[60%] max-h-[50%]" 
              style="background-image: linear-gradient(#e5f3ff 1px, transparent 1px), linear-gradient(90deg, #e5f3ff 1px, transparent 1px); background-size: 20px 20px;">
             {#if graphData.nodes.length > 0 && graphData.links.length > 0}
                 <D3Graph 
+                    bind:this={d3Graph}
                     nodes={graphData.nodes} 
                     links={graphData.links} 
                     on:hovered={handleHovered}
@@ -79,7 +87,7 @@
                 />
             {/if}
 
-            {#if hoveredNode.node}
+            {#if hoveredNode.node && !selectedNode}
                 <div class="absolute top-4 right-4 z-10 pointer-events-none">
                     <Tooltip
                         title={hoveredNode.node.id}
