@@ -3,6 +3,10 @@
     import TeamMemberCard from './TeamMember.svelte';
     import { fade } from 'svelte/transition';
     import { Plus } from 'lucide-svelte';
+    import { createEventDispatcher } from 'svelte';
+    const dispatch = createEventDispatcher<{
+        specialtyClick: string;  // or whatever type your specialty data is
+    }>();
 
     export let members: TeamMember[];
     let selectedSpecialty: string | null = null;

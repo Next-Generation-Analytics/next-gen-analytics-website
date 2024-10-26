@@ -1,6 +1,4 @@
 <script lang="ts">
-	export const prerender = true;
-
 	import '../app.css';
 	import { i18n } from '$lib/i18n';
 	import { ParaglideJS } from '@inlang/paraglide-sveltekit';
@@ -15,10 +13,25 @@
 	// Check if we're on the team page using $derived instead of $:
 	const isTeamPage = $derived($page.url.pathname === '/team');
 
+	let vh: number;
+
 	onMount(() => {
-		// Apply the 'dark' class to the <html> element for dark mode
-		// document.documentElement.classList.add('dark');
+		// Set initial viewport height
+		setViewportHeight();
+		
+		// Update viewport height when window resizes
+		window.addEventListener('resize', setViewportHeight);
+		
+		// Clean up
+		return () => {
+			window.removeEventListener('resize', setViewportHeight);
+		};
 	});
+
+	function setViewportHeight() {
+		vh = window.innerHeight * 0.01;
+		document.documentElement.style.setProperty('--vh', `${vh}px`);
+	}
 </script>
 
 <svelte:head>
@@ -29,10 +42,24 @@
 
 <ParaglideJS {i18n}>
 	<div class="flex flex-col min-h-screen">
-		<Header showHomeLink={isTeamPage} />
+		<Header />
 		<main class="flex-1 w-full">
 			{@render children()}
 		</main>
 		<Footer />
 	</div>
 </ParaglideJS>
+
+<style>
+	/* Add these styles */
+	:global(:root) {
+		height: 100%;
+	}
+	
+	:global(body) {
+		min-height: 100vh;
+		/* Fallback */
+		min-height: calc(var(--vh, 1vh) * 100);
+		overflow-x: hidden;
+	}
+</style>

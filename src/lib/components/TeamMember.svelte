@@ -1,8 +1,9 @@
 <script lang="ts">
-    import type { TeamMember } from '$lib/types/team';
+    import type { TeamMember } from '$lib/types/team';  // Adjust import path as needed
     import { Linkedin, Twitter, Github } from 'lucide-svelte';
 
     export let member: TeamMember;
+    export let onSpecialtyClick: (specialty: string) => void;
 </script>
 
 <div class="w-90 h-[100%] bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105 group flex flex-col">
@@ -45,9 +46,13 @@
         <div class="mt-auto">
             <div class="flex flex-wrap gap-1">
                 {#each member.specialties as specialty}
-                    <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs transition-colors group-hover:bg-blue-200 group-hover:text-blue-900">
+                    <button 
+                        class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs transition-colors 
+                               group-hover:bg-blue-200 group-hover:text-blue-900 hover:bg-blue-300 cursor-pointer"
+                        on:click={() => onSpecialtyClick(specialty)}
+                    >
                         {specialty}
-                    </span>
+                    </button>
                 {/each}
             </div>
         </div>

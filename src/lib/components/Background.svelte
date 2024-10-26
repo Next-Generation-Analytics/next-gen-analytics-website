@@ -22,11 +22,18 @@
 	}
 </script>
 
-<div class="background-wrapper">
-	<div class="background-gradient"></div>
-	<div class="background-container">
+<div class="background-wrapper" role="presentation">
+	<div 
+		class="background-gradient" 
+		role="presentation"
+	></div>
+	<div 
+		class="background-container" 
+		role="presentation"
+	>
 		<!-- Large circles with much larger movement values -->
 		<div class="circle circle-1" 
+			role="presentation"
 			style="transform: rotate({$scrollSpring * 0.3}deg) scale({1 + $scrollSpring * 0.001}) 
 			translateX({Math.sin($scrollSpring * 0.03) * 3}vw)"></div>
 		<div class="circle circle-2" 
@@ -75,7 +82,9 @@
 		top: 0;
 		left: 0;
 		width: 100%;
-		height: 100%;
+		/* Update height to use custom viewport height */
+		height: 100vh; /* Fallback */
+		height: calc(var(--vh, 1vh) * 100);
 		z-index: -1;
 		overflow: hidden;
 	}
@@ -352,4 +361,3 @@
 		}
 	}
 </style>
-

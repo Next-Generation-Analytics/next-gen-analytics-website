@@ -29,8 +29,8 @@
     let isStabilized = false;
 
     // Add these declarations
-    let linkElements: d3.Selection<SVGPathElement, Link, SVGGElement, unknown>;
-    let nodeElements: d3.Selection<SVGGElement, Node, SVGGElement, unknown>;
+    let linkElements: d3.Selection<Element, Link, any, any>;
+    let nodeElements: d3.Selection<Element, Node, any, any>;
 
     let width: number = 800;
     let height: number = 600;
@@ -43,6 +43,14 @@
     const MOVE_THRESHOLD = 3; // pixels of movement to consider it a drag
 
     let isInitialLoad = true; // Flag to track initial load
+
+    // Add at the top with other state variables
+    let isVisible = false;
+
+    // Add helper function at the top of the script
+    function isNode(value: any): value is Node {
+        return typeof value === 'object' && value !== null && 'id' in value;
+    }
 
     function getNodeRadius(node: Node, containerWidth: number) {
         // Base sizes that scale with container width
@@ -93,19 +101,21 @@
         // Update collision force to use responsive radius
         simulation = d3.forceSimulation<Node>(nodes)
             .force("link", d3.forceLink<Node, Link>(links)
-                .id((d: any) => d.id)
-                .distance((d: any) => {
-                    const targetGroup = d.target.group;
-                    return width * (0.2 - targetGroup * 0.03);
+                .id((d) => d.id)
+                .distance((d) => {
+                    // Ensure we're working with Node objects
+                    const target = isNode(d.target) ? d.target : nodes.find(n => n.id === d.target);
+                    if (!target) return width * 0.2;
+                    return width * (0.2 - target.group * 0.03);
                 }))
-            .force("charge", d3.forceManyBody()
-                .strength((d) => d.group === 0 ? -width * 2 : -width * 0.8))
-            .force("radial", d3.forceRadial(
-                (d) => (d.group * width * 0.15), 
+            .force("charge", d3.forceManyBody<Node>()
+                .strength(d => d.group === 0 ? -width * 2 : -width * 0.8))
+            .force("radial", d3.forceRadial<Node>(
+                d => (d.group * width * 0.15), 
                 centerX, 
                 centerY
-            ).strength(1)) // Increased strength for faster settling
-            .force("collision", d3.forceCollide()
+            ).strength(1))
+            .force("collision", d3.forceCollide<Node>()
                 .radius(d => getNodeRadius(d, width) + 5))
             .force("center", d3.forceCenter(centerX, centerY))
             .alphaMin(0.001)     
@@ -129,7 +139,7 @@
             .attr("stroke", "#64748b")
             .attr("stroke-opacity", 0.6)
             .attr("stroke-width", (d) => Math.sqrt(d.value))
-            .attr("fill", "none");
+            .attr("fill", "none") as d3.Selection<Element, Link, any, any>;
 
         // Create node group inside container
         const nodeGroup = graphContainer.append("g")
@@ -140,7 +150,7 @@
             .data(nodes)
             .join("g")
             .attr("class", "node")
-            .style("cursor", "pointer");
+            .style("cursor", "pointer") as d3.Selection<Element, Node, any, any>;
 
         // Update circle sizes to be responsive
         nodeElements
@@ -171,7 +181,10 @@
                     const testLine = line + word + ' ';
                     text.text(testLine);
                     
-                    if (text.node()?.getComputedTextLength() > maxWidth && line.length > 0) {
+                    const textNode = text.node();
+                    const textLength = textNode?.getComputedTextLength() ?? 0;
+                    
+                    if (textLength > maxWidth && line.length > 0) { 
                         lines.push(line);
                         line = word + ' ';
                         lineNumber++;
@@ -225,12 +238,13 @@
 
         // Add end event listener to simulation
         simulation.on("end", () => {
-            // Fade in the graph when forces have settled
-            isStabilized = true;
-            graphContainer
-                .transition()
-                .duration(500)
-                .style("opacity", "1");
+            // Only fade in if we're not in initial load or if resize has occurred
+            if (isVisible) {
+                graphContainer
+                    .transition()
+                    .duration(500)
+                    .style("opacity", "1");
+            }
         });
 
         // Optional: Force quick stabilization
@@ -294,11 +308,19 @@
                 dispatch('selected', d);
             });
 
-        // Freeze connected nodes temporarily
+        // Fix the connected nodes logic
         const connectedNodeIds = new Set(
             links
-                .filter(link => link.source.id === d.id || link.target.id === d.id)
-                .flatMap(link => [link.source.id, link.target.id])
+                .filter(link => {
+                    const sourceId = isNode(link.source) ? link.source.id : link.source;
+                    const targetId = isNode(link.target) ? link.target.id : link.target;
+                    return sourceId === d.id || targetId === d.id;
+                })
+                .flatMap(link => {
+                    const sourceId = isNode(link.source) ? link.source.id : link.source;
+                    const targetId = isNode(link.target) ? link.target.id : link.target;
+                    return [sourceId, targetId];
+                })
         );
 
         // Temporarily fix positions of connected nodes
@@ -385,14 +407,6 @@
         if (isTransitioning) return;
         isTransitioning = true;
 
-        // Fade out existing graph
-        const svgSelection = d3.select(svg);
-        await svgSelection
-            .transition()
-            .duration(200)
-            .style("opacity", 0)
-            .end();
-
         // Stop the simulation if it exists
         simulation?.stop();
         simulation = null;
@@ -400,19 +414,17 @@
         // Reinitialize graph
         initializeGraph();
 
-        // Fade in new graph
-        svgSelection
-            .style("opacity", 0)
-            .transition()
-            .duration(200)
-            .style("opacity", 1);
-
+        // Make graph visible after first resize
+        isVisible = true;
         isTransitioning = false;
     }
 
     onMount(() => {
-        initializeGraph();
-        isInitialLoad = false; // Set flag after initial initialization
+        // Don't initialize until we have a valid size
+        if (svg && svg.clientWidth > 0) {
+            initializeGraph();
+        }
+        isInitialLoad = false;
 
         // Create resize observer with debounced handler
         let resizeTimeout: NodeJS.Timeout;
@@ -496,7 +508,7 @@
     <svg 
         bind:this={svg} 
         class="w-full h-full"
-        style="opacity: 1; transition: opacity 200ms"
+        style="opacity: {isVisible ? 1 : 0}; transition: opacity 200ms"
     ></svg>
 </div>
 
@@ -506,3 +518,4 @@
         max-height: 100%;
     }
 </style>
+
