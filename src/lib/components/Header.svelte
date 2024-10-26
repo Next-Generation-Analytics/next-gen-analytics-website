@@ -4,7 +4,7 @@
     const isHomePage = $derived($page.url.pathname === '/');
 </script>
 
-<header class="relative z-20">
+<header class="relative z-20 h-20">
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-label="Top">
         <div class="w-full sm:pt-6 py-3 flex flex-row items-center justify-between gap-4 sm:gap-0">
             <div class="flex items-center">

@@ -52,7 +52,7 @@
 </script>
 
 <div class="relative flex flex-col">
-    <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex flex-col" style="height: calc(100vh - 2rem)">
+    <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex flex-col" style="height: calc(100vh - 5 rem)">
         <!-- Hero Section -->
         <div class="text-center pt-2 pb-8">
             <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
