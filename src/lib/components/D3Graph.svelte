@@ -44,8 +44,6 @@
 
     let isInitialLoad = true; // Flag to track initial load
 
-    let isVisible = false;
-
     function getNodeRadius(node: Node, containerWidth: number) {
         // Base sizes that scale with container width
         const baseSize = Math.min(containerWidth * 0.05, 65); // Cap at 65px
@@ -344,10 +342,25 @@
     function dragended(event: any, d: any) {
         if (!event.active) {
             simulation?.alphaTarget(0)
-                .alpha(0.5)
-                .alphaDecay(0.04);
+                .alpha(0.3)  // Reduced from 0.5 for gentler movement
+                .alphaDecay(0.03);  // Reduced from 0.04 for slower settling
         }
-        if (d.group !== 0) {
+
+        // For hub node, check if it's outside bounds and snap back if needed
+        if (d.group === 0) {
+            const padding = Math.min(width, height) * 0.15;
+            const isOutOfBounds = 
+                d.x < padding || 
+                d.x > (width - padding) || 
+                d.y < padding || 
+                d.y > (height - padding);
+
+            if (isOutOfBounds) {
+                // Release fixed position to let it snap back
+                d.fx = null;
+                d.fy = null;
+            }
+        } else {
             d.fx = null;
             d.fy = null;
         }
@@ -361,6 +374,14 @@
         if (isTransitioning) return;
         isTransitioning = true;
 
+        // Fade out existing graph
+        const svgSelection = d3.select(svg);
+        await svgSelection
+            .transition()
+            .duration(200)
+            .style("opacity", 0)
+            .end();
+
         // Stop the simulation if it exists
         simulation?.stop();
         simulation = null;
@@ -368,8 +389,13 @@
         // Reinitialize graph
         initializeGraph();
 
-        // Make graph visible after first resize
-        isVisible = true;
+        // Fade in new graph
+        svgSelection
+            .style("opacity", 0)
+            .transition()
+            .duration(200)
+            .style("opacity", 1);
+
         isTransitioning = false;
     }
 
@@ -414,7 +440,7 @@
     <svg 
         bind:this={svg} 
         class="w-full h-full"
-        style="opacity: {isVisible ? 1 : 0}; transition: opacity 200ms"
+        style="opacity: 1; transition: opacity 200ms"
     ></svg>
 </div>
 
@@ -424,3 +450,4 @@
         max-height: 100%;
     }
 </style>
+
