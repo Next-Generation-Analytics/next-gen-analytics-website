@@ -11,7 +11,7 @@
                 <a href="/" class="flex items-center space-x-2 relative group">
                     {#if !isHomePage}
                         <span class="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors duration-300">
-                            Next Gen Analytics
+                            Next Generation Analytics
                             <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-300 group-hover:w-full"></span>
                         </span>
                     {/if}
