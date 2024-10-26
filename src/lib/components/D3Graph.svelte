@@ -29,8 +29,8 @@
     let isStabilized = false;
 
     // Add these declarations
-    let linkElements: d3.Selection<Element, Link, any, any>;
-    let nodeElements: d3.Selection<Element, Node, any, any>;
+    let linkElements: d3.Selection<SVGPathElement, Link, SVGGElement, unknown>;
+    let nodeElements: d3.Selection<SVGGElement, Node, SVGGElement, unknown>;
 
     let width: number = 800;
     let height: number = 600;
@@ -46,9 +46,6 @@
 
     // Add at the top with other state variables
     let isVisible = false;
-
-    // Add this flag near other state variables
-    let isTouchInteraction = false;
 
     // Add helper function at the top of the script
     function isNode(value: any): value is Node {
@@ -79,6 +76,12 @@
             : Math.max(baseWidth * 0.75, 60); // Other nodes: minimum 60px
     }
 
+    // Add this near the top with other imports and declarations
+    const drag = d3.drag<SVGGElement, Node>()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended);
+
     function initializeGraph() {
         if (!svg || !nodes.length || !links.length) return;
 
@@ -108,8 +111,12 @@
                 .distance((d) => {
                     // Ensure we're working with Node objects
                     const target = isNode(d.target) ? d.target : nodes.find(n => n.id === d.target);
-                    if (!target) return width * 0.2;
-                    return width * (0.2 - target.group * 0.03);
+                    if (!target) return Math.min(width, height) * 0.15;
+                    
+                    // Scale down based on the smaller dimension
+                    const minDimension = Math.min(width, height);
+                    const scaleFactor = Math.min(0.15, 0.15 * (800 / minDimension));
+                    return minDimension * (scaleFactor - target.group * 0.02);
                 }))
             .force("charge", d3.forceManyBody<Node>()
                 .strength(d => d.group === 0 ? -width * 2 : -width * 0.8))
@@ -142,18 +149,39 @@
             .attr("stroke", "#64748b")
             .attr("stroke-opacity", 0.6)
             .attr("stroke-width", (d) => Math.sqrt(d.value))
-            .attr("fill", "none") as d3.Selection<Element, Link, any, any>;
+            .attr("fill", "none") as d3.Selection<SVGPathElement, Link, SVGGElement, unknown>;
 
         // Create node group inside container
         const nodeGroup = graphContainer.append("g")
             .attr("class", "nodes");
             
         nodeElements = nodeGroup
-            .selectAll("g")
+            .selectAll<SVGGElement, Node>("g")
             .data(nodes)
             .join("g")
             .attr("class", "node")
-            .style("cursor", "pointer") as d3.Selection<Element, Node, any, any>;
+            .style("cursor", "pointer")
+            .call(drag)
+            .on("click", handleNodeClick)
+            .on("touchend", handleNodeClick) // Add touch handler
+            .on("pointerover", (event, d) => {
+                if (!isDragging && event.pointerType !== 'touch') {
+                    hoveredNodeId = d.id;
+                    dispatch('hovered', { 
+                        node: d,
+                        position: { x: event.clientX, y: event.clientY }
+                    });
+                }
+            })
+            .on("pointerleave", (event) => {
+                if (!isDragging && event.pointerType !== 'touch') {
+                    hoveredNodeId = null;
+                    dispatch('hovered', { 
+                        node: null, 
+                        position: { x: 0, y: 0 } 
+                    });
+                }
+            });
 
         // Update circle sizes to be responsive
         nodeElements
@@ -207,66 +235,6 @@
                 });
             });
 
-        // Create drag behavior
-        const drag = d3.drag<any, Node>()
-            .on("start", dragstarted)
-            .on("drag", dragged)
-            .on("end", dragended);
-
-        nodeElements
-            .call(drag)
-            .on("touchstart", (event, d) => {
-                // Prevent default behavior and stop propagation
-                event.preventDefault();
-                event.stopPropagation();
-                
-                // Mark this as a touch interaction
-                isTouchInteraction = true;
-                
-                // Immediately clear any hover state
-                hoveredNodeId = null;
-                dispatch('hovered', { 
-                    node: null, 
-                    position: { x: 0, y: 0 } 
-                });
-
-                // Directly handle the node selection without waiting for click
-                if (!isDragging) {
-                    handleNodeClick(event, d);
-                }
-            })
-            .on("mousedown", () => {
-                if (!isTouchInteraction) {
-                    isDragging = false;
-                    dragStartPosition = { x: 0, y: 0 };
-                }
-            })
-            .on("click", (event, d) => {
-                // Only handle click for non-touch interactions
-                if (!isTouchInteraction && !isDragging) {
-                    handleNodeClick(event, d);
-                }
-            })
-            .on("hover", (event, d) => {
-                // Completely skip hover events if there was a recent touch
-                if (!isTouchInteraction) {
-                    hoveredNodeId = d.id;
-                    dispatch('hovered', { 
-                        node: d,
-                        position: { x: 0, y: 0 }
-                    });
-                }
-            })
-            .on("mouseleave", () => {
-                if (!isTouchInteraction) {
-                    hoveredNodeId = null;
-                    dispatch('hovered', { 
-                        node: null, 
-                        position: { x: 0, y: 0 } 
-                    });
-                }
-            });
-
         // Add end event listener to simulation
         simulation.on("end", () => {
             // Only fade in if we're not in initial load or if resize has occurred
@@ -298,6 +266,10 @@
     }
 
     function handleNodeClick(event: any, d: Node) {
+        // Prevent event from bubbling up
+        event.preventDefault();
+        event.stopPropagation();
+
         if (isDragging) return;
 
         // Clear hover state immediately when clicked
@@ -324,15 +296,18 @@
             .attr('stroke-width', 2)
             .attr('opacity', 1);
 
-        // Play ripple animation and dispatch event after it completes
+        // Delay the selection to let ripple animation play
+        setTimeout(() => {
+            dispatch('selected', d);
+        }, 50);
+
+        // Play ripple animation and clean up after
         ripple.transition()
             .duration(200)
             .attr('r', radius * 1.1)
             .attr('opacity', 0)
             .on('end', function() {
                 d3.select(this).remove();
-                // Dispatch the selection event after animation
-                dispatch('selected', d);
             });
 
         // Fix the connected nodes logic
@@ -367,8 +342,8 @@
     }
 
     function dragstarted(event: any, d: any) {
-        dragStartPosition = { x: event.x, y: event.y };
         isDragging = false;
+        dragStartPosition = { x: event.x, y: event.y };
 
         if (!event.active) simulation?.alphaTarget(0.3).restart();
         d.fx = d.x;
@@ -382,17 +357,13 @@
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         if (distance > MOVE_THRESHOLD) {
-            if (!isDragging && d.group !== 0) { // Don't modify link strengths for hub node
-                // Only strengthen links when we first determine it's a drag
-                isDragging = true;
-                const linkForce = simulation?.force("link") as d3.ForceLink<Node, Link>;
-                linkForce.strength((link: any) => {
-                    if (link.source.id === d.id || link.target.id === d.id) {
-                        return 1; // Stronger force for connected links
-                    }
-                    return 0.3; // Default force for other links
-                });
-            }
+            isDragging = true;
+            // Clear hover state when dragging starts
+            hoveredNodeId = null;
+            dispatch('hovered', { 
+                node: null, 
+                position: { x: 0, y: 0 } 
+            });
         }
 
         d.fx = event.x;
@@ -402,8 +373,17 @@
     function dragended(event: any, d: any) {
         if (!event.active) {
             simulation?.alphaTarget(0)
-                .alpha(0.25)  // Reduced from 0.5 for gentler movement
-                .alphaDecay(0.03);  // Reduced from 0.04 for slower settling
+                .alpha(0.25)
+                .alphaDecay(0.03);
+        }
+
+        // Only handle as click if we moved less than threshold
+        const dx = event.x - dragStartPosition.x;
+        const dy = event.y - dragStartPosition.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance <= MOVE_THRESHOLD) {
+            handleNodeClick(event, d);
         }
 
         // For hub node, check if it's outside bounds and snap back if needed
@@ -416,7 +396,6 @@
                 d.y > (height - padding);
 
             if (isOutOfBounds) {
-                // Release fixed position to let it snap back
                 d.fx = null;
                 d.fy = null;
             }
@@ -425,9 +404,7 @@
             d.fy = null;
         }
 
-        // Reset link strengths back to normal
-        const linkForce = simulation?.force("link") as d3.ForceLink<Node, Link>;
-        linkForce.strength((link: any) => 0.3);
+        isDragging = false;
     }
 
     async function handleResize() {
@@ -545,6 +522,15 @@
         max-height: 100%;
     }
 </style>
+
+
+
+
+
+
+
+
+
 
 
 
