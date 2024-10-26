@@ -52,8 +52,8 @@
 </script>
 
 <div class="relative flex flex-col">
-    <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex flex-col" style="height: calc(100vh - 5 rem)">
-        <!-- Hero Section -->
+    <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex flex-col pb-8" style="height: calc(100vh - 5rem);">
+        <!-- Hero Section with bottom margin -->
         <div class="text-center pt-2 pb-8">
             <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
                 Next Generation Analytics
@@ -75,7 +75,7 @@
         </div>
 
         <!-- Graph Container -->
-        <div class="flex-1 bg-white rounded-2xl shadow-xl overflow-hidden relative min-h-0 sm:max-h-[60%] max-h-[50%]" 
+        <div class="flex-1 bg-white rounded-2xl shadow-xl overflow-hidden relative min-h-0" 
              style="background-image: linear-gradient(#e5f3ff 1px, transparent 1px), linear-gradient(90deg, #e5f3ff 1px, transparent 1px); background-size: 20px 20px;">
             {#if graphData.nodes.length > 0 && graphData.links.length > 0}
                 <D3Graph 
@@ -108,5 +108,5 @@
 </div>
 
 <style>
-    /* We can remove the tooltip positioning styles since we're handling it with the wrapper div */
+    /* Optional: Add any additional styles if needed */
 </style>
