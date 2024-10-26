@@ -299,7 +299,7 @@
         // Delay the selection to let ripple animation play
         setTimeout(() => {
             dispatch('selected', d);
-        }, 50);
+        }, 150);
 
         // Play ripple animation and clean up after
         ripple.transition()

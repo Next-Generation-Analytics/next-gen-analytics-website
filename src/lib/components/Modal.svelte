@@ -13,6 +13,9 @@
     let dialogElement: HTMLDialogElement;
     let isOpen = false;
 
+    // Store the scroll position before locking
+    let scrollPosition: number;
+
     function handleModalInteraction(e: MouseEvent | KeyboardEvent) {
         // Only handle interactions if modal is open
         if (!isOpen) return;
@@ -20,10 +23,10 @@
         // Handle click outside
         if (e.type === 'click') {
             const mouseEvent = e as MouseEvent;
-            const rect = dialogElement.getBoundingClientRect();
-            const isInDialog = (rect.top <= mouseEvent.clientY && mouseEvent.clientY <= rect.bottom &&
-                rect.left <= mouseEvent.clientX && mouseEvent.clientX <= rect.right);
-            if (!isInDialog) {
+            const clickedElement = mouseEvent.target as HTMLElement;
+            
+            // Only close if clicking directly on the dialog backdrop
+            if (clickedElement === dialogElement) {
                 close();
             }
         }
@@ -57,32 +60,45 @@
         dialogElement?.close();
     }
 
+    function lockScroll() {
+        scrollPosition = window.scrollY;
+        document.body.style.top = `-${scrollPosition}px`;
+        document.body.classList.add('modal-open');
+    }
+
+    function unlockScroll() {
+        document.body.classList.remove('modal-open');
+        document.body.style.top = '';
+        window.scrollTo(0, scrollPosition);
+    }
+
     onMount(() => {
-        showModal(); // Open immediately on mount
+        showModal();
         document.addEventListener('keydown', handleModalInteraction);
         document.addEventListener('click', handleModalInteraction);
-        document.body.style.overflow = 'hidden';
+        lockScroll();
     });
 
     onDestroy(() => {
-        document.body.style.overflow = 'auto';
         document.removeEventListener('keydown', handleModalInteraction);
         document.removeEventListener('click', handleModalInteraction);
+        unlockScroll();
     });
 </script>
 
 {#if isOpen}
     <dialog
         bind:this={dialogElement}
-        class="backdrop:bg-black/50 backdrop:backdrop-blur-sm p-4 md:p-0 bg-transparent w-full max-w-2xl m-auto"
+        class="backdrop:bg-black/50 backdrop:backdrop-blur-sm p-4 md:p-0 bg-transparent w-full max-w-2xl fixed"
     >
         <div
             bind:this={modalContent}
-            class="relative bg-white rounded-xl w-full shadow-xl overflow-hidden"
+            class="relative bg-white rounded-xl w-[calc(100%-2rem)] md:w-full mx-auto shadow-xl overflow-hidden"
+            style="max-height: calc(var(--vh,1vh)*90);"
             role="document"
             transition:scale={{ duration: 200, start: 0.95 }}
         >
-            <!-- Modal content -->
+            <!-- Modal header -->
             <div class="p-4 pb-0 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
                 <div class="flex justify-between items-center mb-6">
                     <h2 id="modal-title" class="text-2xl font-bold text-gray-900">{title}</h2>
@@ -98,8 +114,12 @@
                 </div>
             </div>
 
-            <!-- Scrollable content -->
-            <div class="pt-1 px-6 pb-6 max-h-[calc(90vh-8rem)] overflow-y-auto" id="modal-description">
+            <!-- Updated scrollable content -->
+            <div 
+                class="pt-1 px-6 pb-6 overflow-y-scroll" 
+                style="height: calc(var(--vh,1vh)*90 - 8rem);"
+                id="modal-description"
+            >
                 <ul class="space-y-4">
                     {#each projects as project}
                         <li>
@@ -155,18 +175,37 @@
 
     dialog {
         border: none;
+        margin: 0;
+        padding: 0;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        max-height: calc(var(--vh, 1vh) * 100);
+        overscroll-behavior: none;
+        touch-action: none;
     }
 
     dialog::backdrop {
-        animation: fadeIn 0.2s ease-out;
+        overscroll-behavior: none;
+        touch-action: none;
     }
 
-    @keyframes fadeIn {
-        from { 
-            opacity: 0; 
-        }
-        to { 
-            opacity: 1; 
-        }
+    :global(body.modal-open) {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        overscroll-behavior: none;
+        touch-action: none;
     }
+
+    /* Make sure modal content is scrollable */
+    .overflow-y-scroll {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        touch-action: pan-y;
+    }
+
+    /* ... rest of your styles ... */
 </style>
