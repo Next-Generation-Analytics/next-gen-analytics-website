@@ -8,6 +8,7 @@
 	import Header from '$lib/components/Header.svelte';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+	import Background from '$lib/components/Background.svelte';
 	
 	let { children } = $props();
 
@@ -23,6 +24,8 @@
 <svelte:head>
 	<title>Next Gen Analytics</title>
 </svelte:head>
+
+<Background />
 
 <ParaglideJS {i18n}>
 	<div class="flex flex-col min-h-screen">

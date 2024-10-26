@@ -1,112 +1,88 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
+    /* Core colors */
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
- 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
- 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
- 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
- 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
- 
+    
+    /* UI element colors */
     --primary: 240 5.9% 10%;
     --primary-foreground: 0 0% 98%;
- 
+    
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
- 
+    
+    /* Interactive elements */
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    
     --accent: 240 4.8% 95.9%;
     --accent-foreground: 240 5.9% 10%;
- 
+    
+    /* Feedback colors */
     --destructive: 0 72.2% 50.6%;
     --destructive-foreground: 0 0% 98%;
- 
+    
+    /* Component-specific */
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    
+    /* Utility */
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
     --ring: 240 10% 3.9%;
- 
     --radius: 0.5rem;
- 
-    /* Add new background properties */
-    --dot-size: 1px;
-    --dot-space: 22px;
-    --dot-color: 220 14% 96%;
-    --line-color: 220 14% 95%;
-    --gradient-start: 220 25% 97%;
-    --gradient-end: 220 23% 95%;
   }
- 
+
   .dark {
+    /* Core colors */
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
- 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
- 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
- 
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
- 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
- 
+    
+    /* UI element colors */
     --primary: 0 0% 98%;
     --primary-foreground: 240 5.9% 10%;
- 
+    
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
- 
+    
+    /* Interactive elements */
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    
     --accent: 240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
- 
+    
+    /* Feedback colors */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
- 
+    
+    /* Component-specific */
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    
+    /* Utility */
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
- 
-    /* Dark mode background properties */
-    --dot-color: 220 14% 12%;
-    --line-color: 220 14% 15%;
-    --gradient-start: 220 25% 9%;
-    --gradient-end: 220 23% 11%;
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
-    background-image: 
-      radial-gradient(circle at 50% 50%, 
-        hsl(var(--dot-color)) var(--dot-size), 
-        transparent var(--dot-size)),
-      linear-gradient(to right, 
-        hsl(var(--line-color)) 1px, 
-        transparent 1px),
-      linear-gradient(to bottom, 
-        hsl(var(--line-color)) 1px, 
-        transparent 1px),
-      linear-gradient(to bottom right, 
-        hsl(var(--gradient-start)), 
-        hsl(var(--gradient-end)));
-    background-size: 
-      var(--dot-space) var(--dot-space),
-      var(--dot-space) var(--dot-space),
-      var(--dot-space) var(--dot-space),
-      100% 100%;
-    animation: bg-scroll 60s linear infinite;
   }
 }
 
@@ -115,15 +91,13 @@
     background-position: 
       0 0,
       0 0,
-      0 0,
       0 0;
   }
   100% {
     background-position: 
       var(--dot-space) var(--dot-space),
       var(--dot-space) 0,
-      0 var(--dot-space),
-      0 0;
+      0 var(--dot-space);
   }
 }
 
