@@ -68,7 +68,7 @@
                     Explore Our Services
                     <ArrowRight class="ml-2 h-5 w-5" />
                 </button>
-                <a href="/team" class="inline-flex items-center px-6 py-2 border border-blue-600 text-base font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
+                <a data-sveltekit-preload-data="hover" href="/team" class="inline-flex items-center px-6 py-2 border border-blue-600 text-base font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105">
                     Meet Our Team
                 </a>
             </div>
