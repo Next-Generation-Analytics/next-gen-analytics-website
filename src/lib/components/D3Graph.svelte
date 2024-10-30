@@ -81,6 +81,29 @@
         .on("start", dragstarted)
         .on("drag", dragged)
         .on("end", dragended);
+        
+    function createRippleEffect(element: d3.Selection<any, any, any, any>, node: Node, width: number, onComplete?: () => void) {
+        const radius = getNodeRadius(node, width);
+        const nodeColor = node.group === 0 ? "#3b82f6" : node.group === 1 ? "#10b981" : "#f59e0b";
+        
+        const ripple = element.append('circle')
+            .attr('r', radius)
+            .attr('fill', 'none')
+            .attr('stroke', nodeColor)
+            .attr('stroke-width', 6)
+            .attr('opacity', 0.8)
+            .style('filter', 'brightness(1.4) drop-shadow(0 0 4px ${nodeColor})');
+
+        ripple.transition()
+            .duration(200)
+            .attr('r', radius * 1.5)
+            .attr('opacity', 0)
+            .ease(d3.easeExpOut)
+            .on('end', function() {
+                d3.select(this).remove();
+                onComplete?.();
+            });
+    }
 
     function initializeGraph() {
         if (!svg || !nodes.length || !links.length) return;
@@ -282,33 +305,18 @@
         clickedNode.select('circle')
             .transition()
             .duration(150)
-            .attr('r', r => getNodeRadius(d, width) * 1.2)
+            .attr('r', r => getNodeRadius(d, width) * 1.1)
             .transition()
             .duration(150)
             .attr('r', r => getNodeRadius(d, width));
 
-        // Add ripple effect
-        const radius = getNodeRadius(d, width);
-        const ripple = clickedNode.append('circle')
-            .attr('r', radius)
-            .attr('fill', 'none')
-            .attr('stroke', 'white')
-            .attr('stroke-width', 2)
-            .attr('opacity', 1);
+        // Use the helper function
+        createRippleEffect(clickedNode, d, width);
 
         // Delay the selection to let ripple animation play
         setTimeout(() => {
             dispatch('selected', d);
-        }, 15);
-
-        // Play ripple animation and clean up after
-        ripple.transition()
-            .duration(200)
-            .attr('r', radius * 1.1)
-            .attr('opacity', 0)
-            .on('end', function() {
-                d3.select(this).remove();
-            });
+        }, 125);
 
         // Fix the connected nodes logic
         const connectedNodeIds = new Set(
@@ -467,43 +475,28 @@
         const node = nodes.find(n => n.id === nodeId);
         if (!node) return;
 
-        // Find the node element
         const nodeElement = nodeElements.filter(d => d.id === nodeId);
         if (!nodeElement.empty()) {
             // Clear hover state
             hoveredNodeId = null;
             dispatch('hovered', { 
                 node: null, 
-                position: { x: 0, y: 0 } 
+                position: { x: 0, y: 0 }
             });
 
             // Create click animation
             nodeElement.select('circle')
                 .transition()
                 .duration(150)
-                .attr('r', r => getNodeRadius(node, width) * 1.2)
+                .attr('r', r => getNodeRadius(node, width) * 1.1)
                 .transition()
                 .duration(150)
                 .attr('r', r => getNodeRadius(node, width));
 
-            // Add ripple effect
-            const radius = getNodeRadius(node, width);
-            const ripple = nodeElement.append('circle')
-                .attr('r', radius)
-                .attr('fill', 'none')
-                .attr('stroke', 'white')
-                .attr('stroke-width', 2)
-                .attr('opacity', 1);
-
-            // Play ripple animation and dispatch event
-            ripple.transition()
-                .duration(200)
-                .attr('r', radius * 1.1)
-                .attr('opacity', 0)
-                .on('end', function() {
-                    d3.select(this).remove();
-                    dispatch('selected', node);
-                });
+            // Use the helper function with callback
+            createRippleEffect(nodeElement, node, width, () => {
+                dispatch('selected', node);
+            });
         }
     }
 </script>
