@@ -61,15 +61,14 @@
     }
 
     function lockScroll() {
-        scrollPosition = window.scrollY;
-        document.body.style.top = `-${scrollPosition}px`;
+        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
         document.body.classList.add('modal-open');
     }
 
     function unlockScroll() {
+        document.body.style.paddingRight = '';
         document.body.classList.remove('modal-open');
-        document.body.style.top = '';
-        window.scrollTo(0, scrollPosition);
     }
 
     onMount(() => {
@@ -192,9 +191,6 @@
     }
 
     :global(body.modal-open) {
-        position: fixed;
-        width: 100%;
-        height: 100%;
         overflow: hidden;
         overscroll-behavior: none;
         touch-action: none;
