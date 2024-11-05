@@ -6,7 +6,7 @@
     export let onSpecialtyClick: (specialty: string) => void;
 </script>
 
-<div class="w-90 h-[100%] bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105 group flex flex-col">
+<div class="w-90 h-[100%] bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-[1.02] group flex flex-col">
     <img 
         src={member.image} 
         alt={member.name}
