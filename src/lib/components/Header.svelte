@@ -20,7 +20,7 @@
             <div class="flex self-end items-center gap-6 sm:ml-10">
                 <a 
                     href="mailto:sachskaren@gmail.com" 
-                    class="inline-block px-4 py-2 border border-transparent rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                    class="inline-block px-4 py-2 border border-transparent rounded-md text-base font-medium text-white bg-blue-600 hover:bg-blue-700 will-change-transform transition-all duration-100 ease-in-out hover:-translate-y-1 hover:scale-105 active:translate-y-0 active:scale-100"
                 >
                     Contact
                 </a>

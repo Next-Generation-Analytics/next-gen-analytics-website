@@ -64,11 +64,11 @@
             <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4 mt-4">
                 <button
                     on:click={selectHubNode}
-                    class="inline-flex items-center px-6 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 active:translate-y-0 active:scale-100">
+                    class="inline-flex items-center px-6 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition duration-100 ease-in-out transform hover:-translate-y-1 hover:scale-105 active:translate-y-0 active:scale-100">
                     Explore Our Services
                     <ArrowRight class="ml-2 h-5 w-5" />
                 </button>
-                <a data-sveltekit-preload-data="hover" href="/team" class="inline-flex items-center px-6 py-2 border border-blue-600 text-base font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 active:translate-y-0 active:scale-100">
+                <a data-sveltekit-preload-data="hover" href="/team" class="inline-flex items-center px-6 py-2 border border-blue-600 text-base font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 transition duration-100 ease-in-out transform hover:-translate-y-1 hover:scale-105 active:translate-y-0 active:scale-100">
                     Meet Our Team
                 </a>
             </div>
