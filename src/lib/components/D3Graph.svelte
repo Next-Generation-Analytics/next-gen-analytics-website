@@ -4,6 +4,8 @@
     import * as d3 from 'd3';
     import type { Node, Link } from '$lib/stores/graphStore';
     import type { HoverEvent } from '$lib/types/events';
+    import type { D3DragEvent } from 'd3';
+    import type { D3Node, D3Link } from '$lib/types/d3';
 
     export let nodes: Node[] = [];
     export let links: Link[] = [];
@@ -14,7 +16,7 @@
     }>();
 
     let svg: SVGSVGElement;
-    let simulation: d3.Simulation<Node, Link> | null = null;
+    let simulation: d3.Simulation<D3Node, D3Link> | null = null;
 
     let hoveredNodeId: string | null = null;
 
@@ -29,8 +31,8 @@
     let isStabilized = false;
 
     // Add these declarations
-    let linkElements: d3.Selection<SVGPathElement, Link, SVGGElement, unknown>;
-    let nodeElements: d3.Selection<SVGGElement, Node, SVGGElement, unknown>;
+    let linkElements: d3.Selection<SVGPathElement, D3Link, SVGGElement, unknown>;
+    let nodeElements: d3.Selection<SVGGElement, D3Node, SVGGElement, unknown>;
 
     let width: number = 800;
     let height: number = 600;
@@ -77,7 +79,7 @@
     }
 
     // Add this near the top with other imports and declarations
-    const drag = d3.drag<SVGGElement, Node>()
+    const drag = d3.drag<SVGGElement, D3Node>()
         .on("start", dragstarted)
         .on("drag", dragged)
         .on("end", dragended);
@@ -128,27 +130,25 @@
         }
 
         // Update collision force to use responsive radius
-        simulation = d3.forceSimulation<Node>(nodes)
-            .force("link", d3.forceLink<Node, Link>(links)
+        simulation = d3.forceSimulation<D3Node>(nodes as D3Node[])
+            .force("link", d3.forceLink<D3Node, D3Link>(links as D3Link[])
                 .id((d) => d.id)
                 .distance((d) => {
-                    // Ensure we're working with Node objects
                     const target = isNode(d.target) ? d.target : nodes.find(n => n.id === d.target);
                     if (!target) return Math.min(width, height) * 0.15;
                     
-                    // Scale down based on the smaller dimension
                     const minDimension = Math.min(width, height);
                     const scaleFactor = Math.min(0.15, 0.15 * (800 / minDimension));
                     return minDimension * (scaleFactor - target.group * 0.02);
                 }))
-            .force("charge", d3.forceManyBody<Node>()
+            .force("charge", d3.forceManyBody<D3Node>()
                 .strength(d => d.group === 0 ? -width * 2 : -width * 0.8))
-            .force("radial", d3.forceRadial<Node>(
+            .force("radial", d3.forceRadial<D3Node>(
                 d => (d.group * width * 0.15), 
                 centerX, 
                 centerY
             ).strength(1))
-            .force("collision", d3.forceCollide<Node>()
+            .force("collision", d3.forceCollide<D3Node>()
                 .radius(d => getNodeRadius(d, width) + 5))
             .force("center", d3.forceCenter(centerX, centerY))
             .alphaMin(0.001)     
@@ -172,21 +172,25 @@
             .attr("stroke", "#64748b")
             .attr("stroke-opacity", 0.6)
             .attr("stroke-width", (d) => Math.sqrt(d.value))
-            .attr("fill", "none") as d3.Selection<SVGPathElement, Link, SVGGElement, unknown>;
+            .attr("fill", "none") as d3.Selection<SVGPathElement, D3Link, SVGGElement, unknown>;
 
         // Create node group inside container
         const nodeGroup = graphContainer.append("g")
             .attr("class", "nodes");
             
         nodeElements = nodeGroup
-            .selectAll<SVGGElement, Node>("g")
-            .data(nodes)
+            .selectAll<SVGGElement, D3Node>("g")
+            .data(nodes as D3Node[])
             .join("g")
             .attr("class", "node")
             .style("cursor", "pointer")
             .call(drag)
-            .on("click", handleNodeClick)
-            .on("touchend", handleNodeClick) // Add touch handler
+            .on("click", function(event: MouseEvent, d: D3Node) {
+                handleNodeClick(event, d);
+            })
+            .on("touchend", function(event: TouchEvent, d: D3Node) {
+                handleNodeClick(event, d);
+            })
             .on("pointerover", (event, d) => {
                 if (!isDragging && event.pointerType !== 'touch') {
                     hoveredNodeId = d.id;
@@ -277,88 +281,106 @@
 
         simulation.on("tick", () => {
             // Update positions
-            linkElements.attr("d", (d: any) => {
-                const dx = d.target.x - d.source.x;
-                const dy = d.target.y - d.source.y;
+            linkElements.attr("d", (d) => {
+                const sourceNode = isNode(d.source) ? d.source : nodes.find(n => n.id === d.source);
+                const targetNode = isNode(d.target) ? d.target : nodes.find(n => n.id === d.target);
+                
+                if (!sourceNode?.x || !sourceNode?.y || !targetNode?.x || !targetNode?.y) return '';
+                
+                const dx = targetNode.x - sourceNode.x;
+                const dy = targetNode.y - sourceNode.y;
                 const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
-                return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+                return `M${sourceNode.x},${sourceNode.y}A${dr},${dr} 0 0,1 ${targetNode.x},${targetNode.y}`;
             });
 
-            nodeElements.attr("transform", d => `translate(${d.x},${d.y})`);
+            nodeElements.attr("transform", (d) => {
+                const x = d.x ?? 0;
+                const y = d.y ?? 0;
+                return `translate(${x},${y})`;
+            });
         });
     }
 
-    function handleNodeClick(event: any, d: Node) {
-        // Prevent event from bubbling up
-        event.preventDefault();
-        event.stopPropagation();
+    function handleNodeClick(event: MouseEvent | TouchEvent | D3DragEvent<SVGGElement, D3Node, D3Node>, d: D3Node) {
+        if (event instanceof MouseEvent || event instanceof TouchEvent) {
+            event.preventDefault();
+            event.stopPropagation();
+        } else {
+            event.sourceEvent.preventDefault();
+            event.sourceEvent.stopPropagation();
+        }
 
         if (isDragging) return;
 
         // Clear hover state immediately when clicked
         hoveredNodeId = null;
 
-        // Find the clicked node's element
-        const clickedNode = d3.select(event.currentTarget);
+        // Get the clicked node element directly from the data
+        const clickedNode = nodeElements.filter(node => node.id === d.id);
         
-        // Create click animation
-        clickedNode.select('circle')
-            .transition()
-            .duration(150)
-            .attr('r', r => getNodeRadius(d, width) * 1.1)
-            .transition()
-            .duration(150)
-            .attr('r', r => getNodeRadius(d, width));
+        if (!clickedNode.empty()) {
+            // Create click animation
+            clickedNode.select('circle')
+                .transition()
+                .duration(150)
+                .attr('r', r => getNodeRadius(d, width) * 1.1)
+                .transition()
+                .duration(150)
+                .attr('r', r => getNodeRadius(d, width));
 
-        // Use the helper function
-        createRippleEffect(clickedNode, d, width);
+            // Use the helper function
+            createRippleEffect(clickedNode, d, width);
 
-        // Delay the selection to let ripple animation play
-        setTimeout(() => {
-            dispatch('selected', d);
-        }, 125);
+            // Delay the selection to let ripple animation play
+            setTimeout(() => {
+                dispatch('selected', d);
+            }, 125);
 
-        // Fix the connected nodes logic
-        const connectedNodeIds = new Set(
-            links
-                .filter(link => {
-                    const sourceId = isNode(link.source) ? link.source.id : link.source;
-                    const targetId = isNode(link.target) ? link.target.id : link.target;
-                    return sourceId === d.id || targetId === d.id;
-                })
-                .flatMap(link => {
-                    const sourceId = isNode(link.source) ? link.source.id : link.source;
-                    const targetId = isNode(link.target) ? link.target.id : link.target;
-                    return [sourceId, targetId];
-                })
-        );
+            // Fix the connected nodes logic
+            const connectedNodeIds = new Set(
+                links
+                    .filter(link => {
+                        const sourceId = isNode(link.source) ? link.source.id : link.source;
+                        const targetId = isNode(link.target) ? link.target.id : link.target;
+                        return sourceId === d.id || targetId === d.id;
+                    })
+                    .flatMap(link => {
+                        const sourceId = isNode(link.source) ? link.source.id : link.source;
+                        const targetId = isNode(link.target) ? link.target.id : link.target;
+                        return [sourceId, targetId];
+                    })
+            );
 
-        // Temporarily fix positions of connected nodes
-        nodes.forEach(node => {
-            if (connectedNodeIds.has(node.id)) {
-                node.fx = node.x;
-                node.fy = node.y;
-                
-                setTimeout(() => {
-                    if (node.group !== 0) { // Don't release hub node
-                        node.fx = null;
-                        node.fy = null;
-                    }
-                }, 500);
-            }
-        });
+            // Temporarily fix positions of connected nodes
+            nodes.forEach(node => {
+                if (connectedNodeIds.has(node.id)) {
+                    node.fx = node.x;
+                    node.fy = node.y;
+                    
+                    setTimeout(() => {
+                        if (node.group !== 0) { // Don't release hub node
+                            node.fx = null;
+                            node.fy = null;
+                        }
+                    }, 500);
+                }
+            });
+        }
     }
 
-    function dragstarted(event: any, d: any) {
+    function dragstarted(event: D3DragEvent<SVGGElement, D3Node, D3Node>, d: D3Node) {
         isDragging = false;
         dragStartPosition = { x: event.x, y: event.y };
 
-        if (!event.active) simulation?.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
+        if (!event.active && simulation) {
+            simulation.alphaTarget(0.3).restart();
+        }
+        
+        if (typeof d.x === 'number') d.fx = d.x;
+        if (typeof d.y === 'number') d.fy = d.y;
     }
 
-    function dragged(event: any, d: any) {
+    function dragged(event: D3DragEvent<SVGGElement, D3Node, D3Node>, d: D3Node) {
         // Check if we've moved enough to consider it a drag
         const dx = event.x - dragStartPosition.x;
         const dy = event.y - dragStartPosition.y;
@@ -378,7 +400,7 @@
         d.fy = event.y;
     }
 
-    function dragended(event: any, d: any) {
+    function dragended(event: D3DragEvent<SVGGElement, D3Node, D3Node>, d: D3Node) {
         if (!event.active) {
             simulation?.alphaTarget(0)
                 .alpha(0.25)
@@ -395,7 +417,7 @@
         }
 
         // For hub node, check if it's outside bounds and snap back if needed
-        if (d.group === 0) {
+        if (d.group === 0 && typeof d.x === 'number' && typeof d.y === 'number') {
             const padding = Math.min(width, height) * 0.15;
             const isOutOfBounds = 
                 d.x < padding || 
