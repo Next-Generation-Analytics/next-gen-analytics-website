@@ -7,9 +7,17 @@ const config = {
 	preprocess: [vitePreprocess(), mdsvex()],
 
 	kit: {
-		adapter: adapter(),
+		adapter: adapter({
+			runtime: {
+				type: 'edge',
+				strict: true
+			}
+		}),
 		paths: {
 			relative: false
+		},
+		version: {
+			name: process.env.CF_PAGES_COMMIT_SHA || 'development'
 		}
 	},
 

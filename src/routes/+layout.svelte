@@ -4,35 +4,24 @@
 	import { ParaglideJS } from '@inlang/paraglide-sveltekit';
 	import Footer from '$lib/components/Footer.svelte';
 	import Header from '$lib/components/Header.svelte';
-	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import Background from '$lib/components/Background.svelte';
+	import { dev } from '$app/environment';
 	
 	let { children } = $props();
 
-	// Check if we're on the team page using $derived instead of $:
-	const isTeamPage = $derived($page.url.pathname === '/team');
-
-	let vh: number;
-
-	onMount(() => {
-		// Set initial viewport height
-		setViewportHeight();
-		
-		// Update viewport height when window resizes
-		window.addEventListener('resize', setViewportHeight);
-		
-		// Clean up
-		return () => {
-			window.removeEventListener('resize', setViewportHeight);
-		};
-	});
-
-	function setViewportHeight() {
-		vh = window.innerHeight * 0.01;
-		document.documentElement.style.setProperty('--vh', `${vh}px`);
+	let error = $state<Error | null>(null);
+	
+	function handleError(e: Event) {
+		if (e instanceof ErrorEvent) {
+			error = e.error;
+			if (dev) {
+				console.error('Layout error:', e.error);
+			}
+		}
 	}
 </script>
+
+<svelte:window onerror={handleError} />
 
 <svelte:head>
 	<title>Next Gen Analytics</title>
@@ -46,15 +35,30 @@
 
 <Background />
 
-<ParaglideJS {i18n}>
-	<div class="flex flex-col min-h-screen">
-		<Header />
-		<main class="flex-1 w-full">
-			{@render children()}
-		</main>
-		<Footer />
+{#if error}
+	<div class="flex min-h-screen items-center justify-center p-4">
+		<div class="text-center">
+			<h1 class="text-4xl font-bold mb-4">Something went wrong</h1>
+			<p class="text-lg text-gray-600 mb-4">{error.message}</p>
+			<button 
+				class="text-blue-600 hover:underline"
+				onclick={() => window.location.reload()}
+			>
+				Reload page
+			</button>
+		</div>
 	</div>
-</ParaglideJS>
+{:else}
+	<ParaglideJS {i18n}>
+		<div class="flex flex-col min-h-screen">
+			<Header />
+			<main class="flex-1 w-full">
+				{@render children()}
+			</main>
+			<Footer />
+		</div>
+	</ParaglideJS>
+{/if}
 
 <style>
 	/* Add these styles */
