@@ -1,7 +1,9 @@
-import { redirect } from '@sveltejs/kit';
-
 export const prerender = true;
+export const trailingSlash = 'never';
 
-export function GET() {
-    throw redirect(301, '/team');
+export async function GET() {
+    return new Response(null, {
+        status: 301,
+        headers: { Location: '/team' }
+    });
 }

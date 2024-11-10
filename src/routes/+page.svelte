@@ -59,11 +59,11 @@
                 Next Generation Analytics
             </h1>
             <p class="mt-3 text-md sm:text-lg max-w-xl mx-auto text-gray-500">
-                Research and consulting<br />— systems and computational biology —
+                Research and Consulting<br />— Systems and Computational Biology —
             </p>
             <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4 mt-4">
                 <button
-                    on:click={selectHubNode} 
+                    on:click={selectHubNode}
                     class="inline-flex items-center px-6 py-2 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 active:translate-y-0 active:scale-100">
                     Explore Our Services
                     <ArrowRight class="ml-2 h-5 w-5" />
